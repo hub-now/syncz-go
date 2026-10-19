@@ -2,6 +2,8 @@ package syncz
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -42,6 +44,9 @@ type sandboxCliente struct {
 	seqOp         int
 	seqEnquete    int
 	seqEvento     int
+	// sementeGrupo entra no JID de grupo: dois Dublês (outra instância, outro processo, outro pacote de teste no mesmo
+	// banco) não geram o mesmo JID. Até a v0.4.0 o JID era só o contador, e o 1º grupo de todo Dublê era o mesmo.
+	sementeGrupo uint32
 }
 
 // NovoSandbox cria uma instância em memória do Cliente sync-zap (Dublê).
@@ -60,7 +65,15 @@ func NovoSandbox() SandboxCliente {
 		politicas:    make(map[string][]byte),
 		enquetes:     make(map[string]*Enquete),
 		eventosGrupo: make(map[string]*EventoGrupo),
+		sementeGrupo: novaSementeGrupo(),
 	}
+}
+
+// novaSementeGrupo sorteia a semente do JID de grupo (crypto/rand: não depende de semear o math/rand).
+func novaSementeGrupo() uint32 {
+	var b [4]byte
+	_, _ = rand.Read(b[:]) // crypto/rand.Read não falha (Go 1.24+)
+	return binary.BigEndian.Uint32(b[:])
 }
 
 func (s *sandboxCliente) Fechar() error {
@@ -769,7 +782,8 @@ func (s *sandboxCliente) CriarGrupo(_ context.Context, e EntradaGrupo) (Grupo, e
 		return Grupo{}, novoErroAPI(ErrInvalido, "assunto do grupo obrigatorio")
 	}
 
-	jid := fmt.Sprintf("120363000%d@g.us", len(s.grupos)+1)
+	// Formato <dígitos>@g.us, como o real: prefixo 120363, a semente deste Dublê (10 dígitos) e o contador.
+	jid := fmt.Sprintf("120363%010d%d@g.us", s.sementeGrupo, len(s.grupos)+1)
 	g := &Grupo{
 		JID:           jid,
 		Assunto:       e.Assunto,

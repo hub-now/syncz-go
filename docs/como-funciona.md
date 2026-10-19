@@ -200,6 +200,10 @@ Até a v0.3.0 o módulo era `github.com/quanturisai-ai/syncz-go` (conta pessoal)
 v0.4.0 (17/10/2026, migração para a HubNow) é `github.com/hub-now/syncz-go`; o
 repositório antigo fica com as versões já publicadas e marcado como `Deprecated`.
 
+A v0.4.1 (18/10/2026) corrige o Dublê: `CriarGrupo` gera JID de grupo único entre Dublês (semente sorteada por
+`NovoSandbox`, mesmo formato `<dígitos>@g.us`). Até a v0.4.0 o 1º grupo de todo Dublê tinha o mesmo JID, e dois
+pacotes de teste no mesmo banco colidiam. O módulo passa a pedir Go 1.27.2 (`x/net` v0.60.0, govulncheck limpo).
+
 O fluxo, disparado por uma tag `sdk/vX.Y.Z` neste repositório:
 
 ```
@@ -219,7 +223,7 @@ scripts/publish-sdk.sh:
    6. commita, cria a tag  vX.Y.Z  (sem o prefixo sdk/) e faz push
         │
         ▼
-cliente:  go get github.com/hub-now/syncz-go@v0.4.0
+cliente:  go get github.com/hub-now/syncz-go@v0.4.1
 ```
 
 Requisitos do job: o secret `SDK_PUBLISH_TOKEN` (um PAT com escrita no

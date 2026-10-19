@@ -10,7 +10,7 @@ escolhe o transporte por opção, não por reescrever o código.
 ## Instalação
 
 ```bash
-go get github.com/hub-now/syncz-go@v0.4.0
+go get github.com/hub-now/syncz-go@v0.4.1
 ```
 
 `v0.x` significa interface ainda em movimento: pode quebrar em uma minor. Fixe a

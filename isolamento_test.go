@@ -12,7 +12,7 @@ import (
 
 // TestSDKNaoImportaGateway prova a CA-01 (F13-01): nenhum arquivo do módulo
 // sdk/go pode importar um pacote do gateway (internal/, cmd/ ou o módulo raiz
-// github.com/quanturisai-ai/sync-zap). Se importasse, o SDK deixaria de ser
+// github.com/hub-now/sync-zap). Se importasse, o SDK deixaria de ser
 // publicável isoladamente — um tenant que fizesse `go get` do SDK arrastaria
 // junto o código do gateway, que é justamente o que a Fase 13.1 fecha.
 //
@@ -21,7 +21,7 @@ import (
 func TestSDKNaoImportaGateway(t *testing.T) {
 	const (
 		moduloSDK     = "github.com/hub-now/syncz-go"
-		moduloGateway = "github.com/quanturisai-ai/sync-zap"
+		moduloGateway = "github.com/hub-now/sync-zap"
 	)
 
 	raiz, err := filepath.Abs(".")
