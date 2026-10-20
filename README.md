@@ -54,6 +54,28 @@ func main() {
 
 O mesmo arquivo, executável, está em [`exemplos/primeira-mensagem`](exemplos/primeira-mensagem).
 
+## Mídia recebida
+
+Quando chega uma mensagem com anexo, o `message.received` traz `Midia` e, logo depois, o gateway baixa o arquivo e
+manda `media.ready` (`syncz.PayloadMediaReady`) ou `media.failed` (`syncz.PayloadMediaFailed`). Os dois trazem o
+`WAMensagemID` da mensagem de origem: é por ele que você casa a mídia com o `message.received`.
+
+A `URL` do `media.ready` é uma URL de capacidade: vale um download, vence em `ExpiraEm` e é ela mesma a credencial.
+Baixe em streaming e ponha o seu teto:
+
+```go
+corpo, err := c.BaixarMidia(ctx, p.URL) // 404 (vencida ou já usada) = syncz.ErrNaoEncontrado
+if err != nil {
+	return err
+}
+defer corpo.Close()
+dados, err := io.ReadAll(io.LimitReader(corpo, 10<<20))
+```
+
+Só no transporte REST (no gRPC devolve `syncz.ErrTransporteNaoSuporta`). No Dublê, `InjetarMidia(url, dados)` faz a
+URL servir os bytes uma vez. O webhook só recebe `media.ready` se ele estiver no `event_types` do endpoint (ou se o
+filtro estiver vazio).
+
 ## gRPC com TLS (gateway público)
 
 O gateway público publica gRPC na porta 443, com TLS. Endereço terminado em

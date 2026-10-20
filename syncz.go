@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"time"
 )
 
@@ -760,6 +761,9 @@ type Cliente interface {
 	AtualizarPolitica(ctx context.Context, instanciaID string, configJSON []byte) (Politica, error)
 
 	ObterUso(ctx context.Context, tenantID string) (Uso, error)
+
+	// BaixarMidia baixa em streaming a mídia de um media.ready pela URL de capacidade (midia.go); quem chama fecha.
+	BaixarMidia(ctx context.Context, urlMidia string) (io.ReadCloser, error)
 
 	Fechar() error
 }

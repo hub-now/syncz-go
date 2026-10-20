@@ -19,6 +19,8 @@ type SandboxCliente interface {
 	Recibos() []Recibo
 	Falhar(err error)
 	InjetarPareamento(instanciaID, phone string)
+	// InjetarMidia faz BaixarMidia(urlMidia) devolver estes bytes uma vez (midia.go).
+	InjetarMidia(urlMidia string, dados []byte)
 }
 
 type sandboxCliente struct {
@@ -38,6 +40,7 @@ type sandboxCliente struct {
 	politicas     map[string][]byte
 	enquetes      map[string]*Enquete
 	eventosGrupo  map[string]*EventoGrupo
+	midias        map[string][]byte
 	proximoErro   error
 	seqMsg        int
 	seqInst       int
@@ -65,6 +68,7 @@ func NovoSandbox() SandboxCliente {
 		politicas:    make(map[string][]byte),
 		enquetes:     make(map[string]*Enquete),
 		eventosGrupo: make(map[string]*EventoGrupo),
+		midias:       make(map[string][]byte),
 		sementeGrupo: novaSementeGrupo(),
 	}
 }

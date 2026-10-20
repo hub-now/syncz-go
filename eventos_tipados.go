@@ -139,6 +139,10 @@ func payloadTipadoPara(tipo string) any {
 		return &PayloadPreConsentOperation{}
 	case TipoMessageReceived:
 		return &PayloadMessageReceived{}
+	case TipoMediaReady:
+		return &PayloadMediaReady{}
+	case TipoMediaFailed:
+		return &PayloadMediaFailed{}
 	default:
 		return nil
 	}
