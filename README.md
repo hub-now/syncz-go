@@ -76,6 +76,33 @@ Só no transporte REST (no gRPC devolve `syncz.ErrTransporteNaoSuporta`). No Dub
 URL servir os bytes uma vez. O webhook só recebe `media.ready` se ele estiver no `event_types` do endpoint (ou se o
 filtro estiver vazio).
 
+## Empresa com só a URL base e a chave
+
+O admin entrega à empresa só duas coisas: a **URL base** do gateway e a **chave de API**. Com elas a empresa lê os
+eventos de todas as suas instâncias sem ter webhook, e, se quiser, cadastra o próprio webhook. Só no transporte REST (no
+gRPC esses métodos devolvem `syncz.ErrTransporteNaoSuporta`).
+
+```go
+c, _ := syncz.Novo(syncz.Opcoes{BaseURL: "https://gateway.exemplo.com", ChaveAPI: chave})
+
+// Sem webhook: leia as últimas 2h (20m, 30m, 1h, 2h ou 24h; sem nada = 24h) e guarde o cursor.
+r, err := c.ConsultarEventos(ctx, syncz.OpcoesConsultaEventos{Desde: 2 * time.Hour})
+for _, e := range r.Eventos {
+	processar(e.Cursor, e.Evento) // Cursor cresce sempre
+}
+// Próxima rodada: continue do cursor, sem repetir. TemMais = lote cheio (1000), chame de novo.
+r, err = c.ConsultarEventos(ctx, syncz.OpcoesConsultaEventos{Apos: r.UltimoCursor})
+
+// Com webhook próprio: o Segredo volta UMA vez (guarde para o VerificarWebhook).
+w, err := c.DefinirWebhook(ctx, "https://erp.exemplo.com/syncz", nil) // nil = todos os tipos
+w, err = c.TestarWebhook(ctx)                                            // 2xx deixa Status = "active"
+```
+
+Também há `ConsultarWebhook` (sem o segredo), `ApagarWebhook` (os eventos seguintes ficam só na consulta) e
+`RotacionarSegredoWebhook` (segredo novo uma vez; o anterior vale na janela de rotação). Os eventos ficam 24h no gateway.
+No Dublê, `InjetarEventoEmpresa(ev)` põe um evento na consulta. Exemplo executável em
+[`exemplos/empresa-sem-webhook`](exemplos/empresa-sem-webhook).
+
 ## gRPC com TLS (gateway público)
 
 O gateway público publica gRPC na porta 443, com TLS. Endereço terminado em

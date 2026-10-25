@@ -21,6 +21,8 @@ type SandboxCliente interface {
 	InjetarPareamento(instanciaID, phone string)
 	// InjetarMidia faz BaixarMidia(urlMidia) devolver estes bytes uma vez (midia.go).
 	InjetarMidia(urlMidia string, dados []byte)
+	// InjetarEventoEmpresa põe um evento na consulta da empresa (ConsultarEventos) e devolve o cursor dele (empresa.go).
+	InjetarEventoEmpresa(ev Evento) int64
 }
 
 type sandboxCliente struct {
@@ -41,12 +43,17 @@ type sandboxCliente struct {
 	enquetes      map[string]*Enquete
 	eventosGrupo  map[string]*EventoGrupo
 	midias        map[string][]byte
-	proximoErro   error
-	seqMsg        int
-	seqInst       int
-	seqOp         int
-	seqEnquete    int
-	seqEvento     int
+	// eventosEmpresa e webhook: a consulta sem instância e o webhook da empresa (empresa.go).
+	eventosEmpresa []EventoEmpresa
+	cursorEmpresa  int64
+	webhook        *WebhookEmpresa
+	seqWebhook     int
+	proximoErro    error
+	seqMsg         int
+	seqInst        int
+	seqOp          int
+	seqEnquete     int
+	seqEvento      int
 	// sementeGrupo entra no JID de grupo: dois Dublês (outra instância, outro processo, outro pacote de teste no mesmo
 	// banco) não geram o mesmo JID. Até a v0.4.0 o JID era só o contador, e o 1º grupo de todo Dublê era o mesmo.
 	sementeGrupo uint32

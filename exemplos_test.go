@@ -57,3 +57,18 @@ func TestExemploPrimeiraMensagemCabeEm30Linhas(t *testing.T) {
 		t.Fatalf("exemplo nao compila: %v\nsaida:\n%s", err, string(out))
 	}
 }
+
+// TestExemploEmpresaSemWebhookRodaContraODuble (CA-13): o exemplo do guia de entrada compila e roda contra o Dublê, lendo os
+// eventos pelo cursor e cadastrando o próprio webhook.
+func TestExemploEmpresaSemWebhookRodaContraODuble(t *testing.T) {
+	out, err := exec.Command("go", "run", "./exemplos/empresa-sem-webhook").CombinedOutput()
+	if err != nil {
+		t.Fatalf("exemplo nao roda: %v\nsaida:\n%s", err, out)
+	}
+	for _, want := range []string{"evento 1: message.received da instancia loja-centro", "evento 2:",
+		"novos depois do cursor: 1", "webhook https://erp.exemplo.com/syncz: active (teste respondeu 200)"} {
+		if !strings.Contains(string(out), want) {
+			t.Errorf("saida do exemplo sem %q:\n%s", want, out)
+		}
+	}
+}

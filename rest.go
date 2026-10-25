@@ -9,11 +9,16 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 )
+
+// aspasEscapadas escapa o nome do arquivo no Content-Disposition, como o
+// CreateFormFile da biblioteca padrao faz.
+var aspasEscapadas = strings.NewReplacer(`\`, `\\`, `"`, `\"`)
 
 type clienteREST struct {
 	baseURL    string
@@ -478,6 +483,8 @@ func (c *clienteREST) AcompanharPareamento(ctx context.Context, instanciaID stri
 type sseBloco struct {
 	nome  string
 	dados string
+	// id é a linha "id:" do bloco (o cursor da consulta sem instância, ConsultarEventos); vazio quando não veio.
+	id string
 }
 
 // lerBlocosSSE varre body linha a linha, entregando cada bloco completo a
@@ -496,15 +503,15 @@ func lerBlocosSSE(ctx context.Context, body io.ReadCloser, processar func(sseBlo
 	scanner := bufio.NewScanner(body)
 	scanner.Buffer(make([]byte, 0, 4096), 1<<20)
 
-	var eventName string
+	var eventName, eventID string
 	var dataLines []string
 
 	for scanner.Scan() {
 		linha := scanner.Text()
 		if linha == "" {
 			if eventName != "" || len(dataLines) > 0 {
-				bloco := sseBloco{nome: eventName, dados: strings.Join(dataLines, "\n")}
-				eventName, dataLines = "", nil
+				bloco := sseBloco{nome: eventName, dados: strings.Join(dataLines, "\n"), id: eventID}
+				eventName, eventID, dataLines = "", "", nil
 				if !processar(bloco) {
 					return
 				}
@@ -514,6 +521,8 @@ func lerBlocosSSE(ctx context.Context, body io.ReadCloser, processar func(sseBlo
 		switch {
 		case strings.HasPrefix(linha, "event:"):
 			eventName = strings.TrimSpace(strings.TrimPrefix(linha, "event:"))
+		case strings.HasPrefix(linha, "id:"):
+			eventID = strings.TrimSpace(strings.TrimPrefix(linha, "id:"))
 		case strings.HasPrefix(linha, "data:"):
 			dataLines = append(dataLines, strings.TrimPrefix(strings.TrimPrefix(linha, "data:"), " "))
 		}
@@ -881,9 +890,18 @@ func (c *clienteREST) EnviarMidia(ctx context.Context, e EntradaEnvioMidia) (Rec
 	if filename == "" {
 		filename = "arquivo.bin"
 	}
-	part, err := writer.CreateFormFile("file", filename)
+	// Sem o Content-Type da parte, o servidor le application/octet-stream
+	// e audio ogg/opus vira documento (buildAudioMsg so marca PTT com ogg/opus).
+	mime := e.MimeType
+	if mime == "" {
+		mime = "application/octet-stream"
+	}
+	cabecalho := textproto.MIMEHeader{}
+	cabecalho.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file"; filename="%s"`, aspasEscapadas.Replace(filename)))
+	cabecalho.Set("Content-Type", mime)
+	part, err := writer.CreatePart(cabecalho)
 	if err != nil {
-		return Recibo{}, fmt.Errorf("syncz: criar form file: %w", err)
+		return Recibo{}, fmt.Errorf("syncz: criar parte do arquivo: %w", err)
 	}
 	if _, err := part.Write(e.Conteudo); err != nil {
 		return Recibo{}, fmt.Errorf("syncz: escrever bytes do arquivo: %w", err)

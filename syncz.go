@@ -765,5 +765,14 @@ type Cliente interface {
 	// BaixarMidia baixa em streaming a mídia de um media.ready pela URL de capacidade (midia.go); quem chama fecha.
 	BaixarMidia(ctx context.Context, urlMidia string) (io.ReadCloser, error)
 
+	// Empresa sem webhook (empresa.go; só REST, o gRPC devolve ErrTransporteNaoSuporta): eventos de todas as instâncias da
+	// empresa da chave por janela ou cursor, e o webhook da própria empresa.
+	ConsultarEventos(ctx context.Context, o OpcoesConsultaEventos) (ConsultaEventos, error)
+	DefinirWebhook(ctx context.Context, url string, tiposEvento []string) (WebhookEmpresa, error)
+	ConsultarWebhook(ctx context.Context) (WebhookEmpresa, error)
+	ApagarWebhook(ctx context.Context) error
+	TestarWebhook(ctx context.Context) (WebhookEmpresa, error)
+	RotacionarSegredoWebhook(ctx context.Context) (WebhookEmpresa, error)
+
 	Fechar() error
 }

@@ -244,6 +244,48 @@ func TestClienteREST(t *testing.T) {
 	}
 }
 
+// TestEnviarMidiaREST_MimeType prova que a parte do arquivo leva o mimetype
+// informado: o servidor (internal/modulos/rest/messages.go) le o Content-Type
+// da parte, e audio ogg/opus sem ele vira documento.
+func TestEnviarMidiaREST_MimeType(t *testing.T) {
+	var recebido string
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /api/v1/instances/{id}/messages", func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseMultipartForm(1 << 20); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if arqs := r.MultipartForm.File["file"]; len(arqs) == 1 {
+			recebido = arqs[0].Header.Get("Content-Type")
+		}
+		w.WriteHeader(http.StatusAccepted)
+		_ = json.NewEncoder(w).Encode(map[string]any{"message_id": "msg-midia-rest", "status": "accepted"})
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	cli, err := syncz.Novo(syncz.Opcoes{BaseURL: ts.URL, ChaveAPI: "secret-token", HTTPClient: ts.Client()})
+	if err != nil {
+		t.Fatalf("Novo falhou: %v", err)
+	}
+	defer cli.Fechar()
+
+	_, err = cli.EnviarMidia(context.Background(), syncz.EntradaEnvioMidia{
+		InstanciaID:       "inst-rest-1",
+		Para:              "5511999999999",
+		MimeType:          "audio/ogg; codecs=opus",
+		NomeArquivo:       "voz.ogg",
+		Conteudo:          []byte("OggS-opus"),
+		ChaveIdempotencia: "midia-ogg-1",
+	})
+	if err != nil {
+		t.Fatalf("EnviarMidia falhou: %v", err)
+	}
+	if recebido != "audio/ogg; codecs=opus" {
+		t.Errorf("mimetype da parte = %q, queria %q", recebido, "audio/ogg; codecs=opus")
+	}
+}
+
 // sseEventoData escreve um bloco SSE sem "event:" (o formato real de GET
 // /events/stream -- ver internal/modulos/sse/stream.go, Stream.Send com
 // name="") e da flush imediato.

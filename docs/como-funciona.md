@@ -150,6 +150,7 @@ de inventar um valor.
 | `Desparear` (task 589, `v0.3.0`, CA-16/CA-20) | sim (`POST .../unpair`) | sim (`UnpairInstance`, task 588) | sim | desfaz o pareamento sem apagar a instância; o aparelho some de "Aparelhos conectados" no celular |
 | `RegistrarAceite.Evidencia` (task 589, `v0.3.0`, CA-16/CA-06) | sim (campo `evidence` no corpo) | sim (`GrantConsentRequest.evidence`, `google.protobuf.Struct`, task 588) | sim | objeto JSON livre ≤ 4KiB que só o caminho `tenant` aceita — prova de como a tela própria obteve o aceite |
 | `ObterInstancia.Consentimento`/`.PareadoEm` (task 589, `v0.3.0`, CA-16/CA-08) | sim | sim | sim | bloco `consent` (status/origin/granted_by/...) e `paired_at` da instância, desde a task 583 |
+| `ConsultarEventos` e `DefinirWebhook`/`ConsultarWebhook`/`ApagarWebhook`/`TestarWebhook`/`RotacionarSegredoWebhook` (tarefa 160) | sim (`GET /api/v1/events/stream` sem `instance_id`; `PUT/GET/DELETE /api/v1/webhook`, `POST .../test`, `POST .../rotate-secret`) | `ErrTransporteNaoSuporta` | sim | a empresa entra só com a URL base e a chave: consulta sem webhook pelo cursor, ou cadastra o próprio webhook |
 | `ObterContratoTenant.PreConsentimento` (task 589, `v0.3.0`, CA-16) | sim (`GET /api/v1/contract`, campo `pre_consent`) | `ClienteContratoTenant` não implementado (descoberta de contrato é HTTP-only por decisão de arquitetura, T-22) | não | descubra o suporte com `if ct, ok := cli.(syncz.ClienteContratoTenant); ok { ... }`, mesmo padrão de `ClienteEventosStream` |
 
 Regra de desenho consistente nas 7 tasks: quando o `.proto` **não tem** RPC
@@ -203,6 +204,17 @@ repositório antigo fica com as versões já publicadas e marcado como `Deprecat
 A v0.4.1 (18/10/2026) corrige o Dublê: `CriarGrupo` gera JID de grupo único entre Dublês (semente sorteada por
 `NovoSandbox`, mesmo formato `<dígitos>@g.us`). Até a v0.4.0 o 1º grupo de todo Dublê tinha o mesmo JID, e dois
 pacotes de teste no mesmo banco colidiam. O módulo passa a pedir Go 1.27.2 (`x/net` v0.60.0, govulncheck limpo).
+
+A v0.4.3 (25/10/2026, patch aditivo) corrige o `EnviarMidia` pelo REST: a parte do arquivo passa a levar
+`Content-Type` = `EntradaEnvioMidia.MimeType` (como o gRPC já fazia). Sem `MimeType`, segue `application/octet-stream`.
+Antes, áudio `audio/ogg; codecs=opus` chegava ao gateway como octet-stream e virava documento, não nota de voz (PTT).
+
+Próxima versão (tarefa 160, spec `empresa-sem-webhook`; ainda sem tag): mudança **aditiva**, nenhum método existente muda.
+`Cliente` ganha `ConsultarEventos` (eventos de todas as instâncias da empresa por `GET /api/v1/events/stream` sem
+`instance_id`, janela `Desde` ou cursor `Apos`, lote de 1000, `Cursor` = a linha `id:` do SSE) e os métodos do webhook da
+empresa pela chave: `DefinirWebhook`, `ConsultarWebhook`, `ApagarWebhook`, `TestarWebhook` e `RotacionarSegredoWebhook`
+(`/api/v1/webhook*`). Só REST; no gRPC devolvem `ErrTransporteNaoSuporta`. O Dublê ganha `InjetarEventoEmpresa` e guarda o
+webhook em memória. Quem implementa `Cliente` por conta própria (mock) precisa dos 6 métodos novos.
 
 O fluxo, disparado por uma tag `sdk/vX.Y.Z` neste repositório:
 
