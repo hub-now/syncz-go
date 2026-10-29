@@ -19,6 +19,10 @@ const (
 	TipoContractRevoked             = "contract.revoked"
 	TipoInstancePreConsentOperation = "instance.pre_consent_operation"
 	TipoMessageReceived             = "message.received"
+	TipoInstanceRelinkRequired      = "instance.relink_required"
+	TipoInstanceConnectionLost      = "instance.connection_lost"
+	TipoInstanceConnectionRestored  = "instance.connection_restored"
+	TipoConnectLinkOpened           = "connect_link.opened"
 )
 
 // PayloadStatusChanged e' o corpo de instance.status_changed.
@@ -82,6 +86,34 @@ type PayloadPreConsentOperation struct {
 	Em          time.Time `json:"at"`
 }
 
+// PayloadRelinkRequired e' o corpo de instance.relink_required (task 189, CA-07):
+// a instancia caiu em logged_out; quem avisa o titular e' a empresa (RN-03).
+type PayloadRelinkRequired struct {
+	Telefone string `json:"phone_number"`
+	Motivo   string `json:"reason"`
+}
+
+// PayloadConnectionLost e' o corpo de instance.connection_lost (task 191, CA-10):
+// Desde e' o inicio da queda.
+type PayloadConnectionLost struct {
+	InstanciaID string    `json:"instance_id"`
+	Desde       time.Time `json:"since"`
+}
+
+// PayloadConnectionRestored e' o corpo de instance.connection_restored (task 191,
+// CA-10): PerdidaEm e' o inicio da queda que o connection_lost ja tinha anunciado.
+type PayloadConnectionRestored struct {
+	InstanciaID string    `json:"instance_id"`
+	PerdidaEm   time.Time `json:"lost_at"`
+}
+
+// PayloadConnectLinkOpened e' o corpo de connect_link.opened (task 190, CA-02):
+// emitido uma unica vez por link, na primeira abertura.
+type PayloadConnectLinkOpened struct {
+	InstanciaID string `json:"instance_id"`
+	LinkID      string `json:"link_id"`
+}
+
 // PayloadContato e' o remetente/contato de PayloadMessageReceived.
 type PayloadContato struct {
 	ID           string `json:"id,omitempty"`
@@ -139,6 +171,14 @@ func payloadTipadoPara(tipo string) any {
 		return &PayloadPreConsentOperation{}
 	case TipoMessageReceived:
 		return &PayloadMessageReceived{}
+	case TipoInstanceRelinkRequired:
+		return &PayloadRelinkRequired{}
+	case TipoInstanceConnectionLost:
+		return &PayloadConnectionLost{}
+	case TipoInstanceConnectionRestored:
+		return &PayloadConnectionRestored{}
+	case TipoConnectLinkOpened:
+		return &PayloadConnectLinkOpened{}
 	case TipoMediaReady:
 		return &PayloadMediaReady{}
 	case TipoMediaFailed:

@@ -273,6 +273,13 @@ func (c *clienteGRPC) EmitirAcessoTitular(ctx context.Context, instanciaID strin
 	return AcessoTitular{InstanciaID: resp.GetInstanceId(), Token: resp.GetToken(), ExpiraEm: exp}, nil
 }
 
+// ParearComTelefone (task 192, CA-11): PairingStateRequest (proto/syncz/v1/syncz.proto)
+// só tem instance_id, e o .proto não muda nesta tarefa. Devolve
+// ErrTransporteNaoSuporta em vez de ignorar o telefone em silêncio.
+func (c *clienteGRPC) ParearComTelefone(_ context.Context, _, _ string) (Pareamento, error) {
+	return Pareamento{}, ErrTransporteNaoSuporta
+}
+
 func (c *clienteGRPC) EstadoPareamento(ctx context.Context, instanciaID string) (Pareamento, error) {
 	ctx, cancel := c.comPrazo(ctx)
 	defer cancel()

@@ -416,7 +416,22 @@ func (c *clienteREST) EmitirAcessoTitular(ctx context.Context, instanciaID strin
 }
 
 func (c *clienteREST) EstadoPareamento(ctx context.Context, instanciaID string) (Pareamento, error) {
-	_, respBytes, err := c.requisicao(ctx, http.MethodGet, "/api/v1/instances/"+url.PathEscape(instanciaID)+"/pairing", nil, "")
+	return c.consultarPareamento(ctx, instanciaID, "")
+}
+
+// ParearComTelefone (task 192, CA-11): mesma rota de EstadoPareamento com ?phone=.
+func (c *clienteREST) ParearComTelefone(ctx context.Context, instanciaID, telefone string) (Pareamento, error) {
+	return c.consultarPareamento(ctx, instanciaID, telefone)
+}
+
+// consultarPareamento é o corpo único de EstadoPareamento e ParearComTelefone:
+// telefone vazio não manda ?phone=.
+func (c *clienteREST) consultarPareamento(ctx context.Context, instanciaID, telefone string) (Pareamento, error) {
+	caminho := "/api/v1/instances/" + url.PathEscape(instanciaID) + "/pairing"
+	if telefone != "" {
+		caminho += "?phone=" + url.QueryEscape(telefone)
+	}
+	_, respBytes, err := c.requisicao(ctx, http.MethodGet, caminho, nil, "")
 	if err != nil {
 		return Pareamento{}, err
 	}

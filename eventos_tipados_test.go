@@ -141,6 +141,49 @@ func TestDecodificarEvento_MessageReceived(t *testing.T) {
 	}
 }
 
+// Task 192 (CA-12, spec reconectar-mesma-instancia): os quatro eventos novos
+// das tasks 189-191 e 190 decodificam para o payload tipado, com os mesmos
+// nomes e campos JSON de internal/modulos/core/event_types.go.
+func TestDecodificarEvento_RelinkRequired(t *testing.T) {
+	p := decodificarCaso(t, syncz.TipoInstanceRelinkRequired, map[string]any{
+		"phone_number": "5531999995443", "reason": "logged_out",
+	})
+	rr, ok := p.(*syncz.PayloadRelinkRequired)
+	if !ok || rr.Telefone != "5531999995443" || rr.Motivo != "logged_out" {
+		t.Fatalf("PayloadRelinkRequired incorreto: %+v (ok=%v)", p, ok)
+	}
+}
+
+func TestDecodificarEvento_ConnectionLost(t *testing.T) {
+	p := decodificarCaso(t, syncz.TipoInstanceConnectionLost, map[string]any{
+		"instance_id": "inst-1", "since": "2026-10-29T13:16:05-03:00",
+	})
+	cl, ok := p.(*syncz.PayloadConnectionLost)
+	if !ok || cl.InstanciaID != "inst-1" || cl.Desde.IsZero() {
+		t.Fatalf("PayloadConnectionLost incorreto: %+v (ok=%v)", p, ok)
+	}
+}
+
+func TestDecodificarEvento_ConnectionRestored(t *testing.T) {
+	p := decodificarCaso(t, syncz.TipoInstanceConnectionRestored, map[string]any{
+		"instance_id": "inst-1", "lost_at": "2026-10-29T13:16:05-03:00",
+	})
+	cr, ok := p.(*syncz.PayloadConnectionRestored)
+	if !ok || cr.InstanciaID != "inst-1" || cr.PerdidaEm.IsZero() {
+		t.Fatalf("PayloadConnectionRestored incorreto: %+v (ok=%v)", p, ok)
+	}
+}
+
+func TestDecodificarEvento_ConnectLinkOpened(t *testing.T) {
+	p := decodificarCaso(t, syncz.TipoConnectLinkOpened, map[string]any{
+		"instance_id": "inst-1", "link_id": "link-9",
+	})
+	co, ok := p.(*syncz.PayloadConnectLinkOpened)
+	if !ok || co.InstanciaID != "inst-1" || co.LinkID != "link-9" {
+		t.Fatalf("PayloadConnectLinkOpened incorreto: %+v (ok=%v)", p, ok)
+	}
+}
+
 // TestDecodificarEvento_TipoDesconhecido prova que tipos nao mapeados (ex.:
 // eventos de grupo) deixam PayloadTipado nil sem erro -- Payload continua
 // disponivel para decodificacao manual.

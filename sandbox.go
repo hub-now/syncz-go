@@ -382,6 +382,12 @@ func (s *sandboxCliente) EstadoPareamento(_ context.Context, instanciaID string)
 	return *p, nil
 }
 
+// ParearComTelefone (task 192): o Dublê não modela o número do titular; devolve
+// o mesmo estado de EstadoPareamento (o telefone é ignorado de propósito).
+func (s *sandboxCliente) ParearComTelefone(ctx context.Context, instanciaID, _ string) (Pareamento, error) {
+	return s.EstadoPareamento(ctx, instanciaID)
+}
+
 func (s *sandboxCliente) Contrato(_ context.Context, instanciaID string) (ContratoInfo, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

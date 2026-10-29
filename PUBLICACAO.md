@@ -4,8 +4,8 @@ Conteúdo **gerado**. A fonte é `sdk/go/` do gateway `sync-zap`, espelhado por
 `scripts/publish-sdk.sh` a cada tag. Editar aqui não tem efeito: a próxima
 publicação sobrescreve.
 
-- Versão: `v0.5.0`
-- Origem: commit `f588871` do `sync-zap`
+- Versão: `v0.6.0`
+- Origem: commit `2f1f058` do `sync-zap`
 - Contrato: `proto/syncz/v1/syncz.proto` no gateway (fonte única, ADR D-13.1.1)
 
 Bug ou pedido de capacidade: abra no gateway, não aqui.

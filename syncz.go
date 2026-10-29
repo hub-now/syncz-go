@@ -740,6 +740,10 @@ type Cliente interface {
 	Desparear(ctx context.Context, instanciaID string) (Instancia, error)
 
 	EstadoPareamento(ctx context.Context, instanciaID string) (Pareamento, error)
+	// ParearComTelefone (task 192, CA-11) pede o pareamento com o telefone do
+	// titular (GET .../pairing?phone=): o servidor rearma a instância logged_out
+	// e devolve o QR e o código de 8 dígitos. Só REST; o gRPC não tem o campo.
+	ParearComTelefone(ctx context.Context, instanciaID, telefone string) (Pareamento, error)
 	Contrato(ctx context.Context, instanciaID string) (ContratoInfo, error)
 	RegistrarAceite(ctx context.Context, e EntradaAceite) error
 	// SolicitarConsentimento (task 589, CA-16/CA-13) pede ao titular, por DM

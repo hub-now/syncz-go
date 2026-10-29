@@ -103,6 +103,23 @@ Também há `ConsultarWebhook` (sem o segredo), `ApagarWebhook` (os eventos segu
 No Dublê, `InjetarEventoEmpresa(ev)` põe um evento na consulta. Exemplo executável em
 [`exemplos/empresa-sem-webhook`](exemplos/empresa-sem-webhook).
 
+## Reconectar o WhatsApp no seu sistema
+
+Quando o titular remove o aparelho, a instância vai a `logged_out` e o gateway emite `instance.relink_required`. Quem avisa
+o titular é a sua empresa; o gateway nunca contata o titular. Para religar a mesma instância, escolha uma das duas formas:
+
+- **Link longo no seu sistema:** monte o token com o seu segredo e ponha o link longo na sua tela. A cada clique,
+  `HandlerReconectar` gera um link novo de 10 min na API e responde 302 para ele.
+
+```go
+token := syncz.AssinarReconexao(segredo, instanciaID) // o segredo fica só no seu servidor
+http.Handle("/reconectar", syncz.HandlerReconectar(c, syncz.ResolverAssinado(segredo, "t")))
+// Mande ao titular: https://seu.sistema/reconectar?t=<token>
+```
+
+- **Tela própria:** `c.ParearComTelefone(ctx, instanciaID, telefone)` rearma a instância e devolve o QR e o `PairCode`
+  (código de 8 dígitos). Acompanhe com `AcompanharPareamento` (só REST). O telefone tem de ser o mesmo número de antes.
+
 ## gRPC com TLS (gateway público)
 
 O gateway público publica gRPC na porta 443, com TLS. Endereço terminado em
