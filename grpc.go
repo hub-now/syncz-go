@@ -733,6 +733,25 @@ func (c *clienteGRPC) ResponderEventoGrupo(ctx context.Context, e EntradaRespond
 	}, nil
 }
 
+// VotarEnquete consome o RPC VotePoll.
+func (c *clienteGRPC) VotarEnquete(ctx context.Context, e EntradaVotarEnquete) (VotoEnquete, error) {
+	ctx, cancel := c.comPrazo(ctx)
+	defer cancel()
+
+	wait, timeoutMs := e.protoWait()
+	resp, err := c.cli.VotePoll(ctx, &synczv1.VotePollRequest{
+		InstanceId:    e.InstanciaID,
+		PollId:        e.PollID,
+		Options:       e.Opcoes,
+		Wait:          wait,
+		WaitTimeoutMs: timeoutMs,
+	})
+	if err != nil {
+		return VotoEnquete{}, mapearErroGRPC(err)
+	}
+	return VotoEnquete{PollID: resp.GetPollId(), Opcoes: resp.GetOptions()}, nil
+}
+
 func (c *clienteGRPC) CriarGrupo(ctx context.Context, e EntradaGrupo) (Grupo, error) {
 	ctx, cancel := c.comPrazo(ctx)
 	defer cancel()

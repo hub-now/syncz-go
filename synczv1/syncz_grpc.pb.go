@@ -51,6 +51,7 @@ const (
 	SyncZap_ListPolls_FullMethodName          = "/syncz.v1.SyncZap/ListPolls"
 	SyncZap_GetPollResults_FullMethodName     = "/syncz.v1.SyncZap/GetPollResults"
 	SyncZap_ClosePoll_FullMethodName          = "/syncz.v1.SyncZap/ClosePoll"
+	SyncZap_VotePoll_FullMethodName           = "/syncz.v1.SyncZap/VotePoll"
 	SyncZap_PairingState_FullMethodName       = "/syncz.v1.SyncZap/PairingState"
 	SyncZap_GetContract_FullMethodName        = "/syncz.v1.SyncZap/GetContract"
 	SyncZap_GrantConsent_FullMethodName       = "/syncz.v1.SyncZap/GrantConsent"
@@ -113,6 +114,7 @@ type SyncZapClient interface {
 	ListPolls(ctx context.Context, in *ListPollsRequest, opts ...grpc.CallOption) (*ListPollsResponse, error)
 	GetPollResults(ctx context.Context, in *GetPollResultsRequest, opts ...grpc.CallOption) (*PollResults, error)
 	ClosePoll(ctx context.Context, in *ClosePollRequest, opts ...grpc.CallOption) (*Poll, error)
+	VotePoll(ctx context.Context, in *VotePollRequest, opts ...grpc.CallOption) (*VotePollResponse, error)
 	// ── Onboarding transparente ──
 	// O tenant desenha a propria jornada: obtem o QR como string, o termo e os
 	// escopos para compor UMA tela de autorizacao, e registra o aceite do
@@ -481,6 +483,16 @@ func (c *syncZapClient) ClosePoll(ctx context.Context, in *ClosePollRequest, opt
 	return out, nil
 }
 
+func (c *syncZapClient) VotePoll(ctx context.Context, in *VotePollRequest, opts ...grpc.CallOption) (*VotePollResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VotePollResponse)
+	err := c.cc.Invoke(ctx, SyncZap_VotePoll_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *syncZapClient) PairingState(ctx context.Context, in *PairingStateRequest, opts ...grpc.CallOption) (*PairingStateInfo, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PairingStateInfo)
@@ -595,6 +607,7 @@ type SyncZapServer interface {
 	ListPolls(context.Context, *ListPollsRequest) (*ListPollsResponse, error)
 	GetPollResults(context.Context, *GetPollResultsRequest) (*PollResults, error)
 	ClosePoll(context.Context, *ClosePollRequest) (*Poll, error)
+	VotePoll(context.Context, *VotePollRequest) (*VotePollResponse, error)
 	// ── Onboarding transparente ──
 	// O tenant desenha a propria jornada: obtem o QR como string, o termo e os
 	// escopos para compor UMA tela de autorizacao, e registra o aceite do
@@ -714,6 +727,9 @@ func (UnimplementedSyncZapServer) GetPollResults(context.Context, *GetPollResult
 }
 func (UnimplementedSyncZapServer) ClosePoll(context.Context, *ClosePollRequest) (*Poll, error) {
 	return nil, status.Error(codes.Unimplemented, "method ClosePoll not implemented")
+}
+func (UnimplementedSyncZapServer) VotePoll(context.Context, *VotePollRequest) (*VotePollResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method VotePoll not implemented")
 }
 func (UnimplementedSyncZapServer) PairingState(context.Context, *PairingStateRequest) (*PairingStateInfo, error) {
 	return nil, status.Error(codes.Unimplemented, "method PairingState not implemented")
@@ -1294,6 +1310,24 @@ func _SyncZap_ClosePoll_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SyncZap_VotePoll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VotePollRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SyncZapServer).VotePoll(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SyncZap_VotePoll_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SyncZapServer).VotePoll(ctx, req.(*VotePollRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SyncZap_PairingState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PairingStateRequest)
 	if err := dec(in); err != nil {
@@ -1520,6 +1554,10 @@ var SyncZap_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClosePoll",
 			Handler:    _SyncZap_ClosePoll_Handler,
+		},
+		{
+			MethodName: "VotePoll",
+			Handler:    _SyncZap_VotePoll_Handler,
 		},
 		{
 			MethodName: "PairingState",

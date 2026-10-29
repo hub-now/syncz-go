@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 )
@@ -42,6 +43,7 @@ type sandboxCliente struct {
 	politicas     map[string][]byte
 	enquetes      map[string]*Enquete
 	eventosGrupo  map[string]*EventoGrupo
+	votosEnquete  map[string][]string
 	midias        map[string][]byte
 	// eventosEmpresa e webhook: a consulta sem instância e o webhook da empresa (empresa.go).
 	eventosEmpresa []EventoEmpresa
@@ -598,10 +600,8 @@ func (s *sandboxCliente) CriarEnquete(_ context.Context, e EntradaCriarEnquete) 
 	return *enq, nil
 }
 
-// ResultadoEnquete devolve o tally da enquete fake -- como o Dublê não expõe
-// um método para votar (Cliente não tem esse RPC, ver EnqueteResultado em
-// syncz.go), o tally sempre vem zerado por opção: cobre o contrato (mesma
-// ordem de Opcoes, TotalVotantes) sem fingir um voto que ninguém deu.
+// ResultadoEnquete devolve o tally da enquete fake na mesma ordem de Opcoes:
+// zerado, a não ser pelo voto da própria instância dado em VotarEnquete.
 func (s *sandboxCliente) ResultadoEnquete(_ context.Context, _ string, pollID string) (EnqueteResultado, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -619,11 +619,78 @@ func (s *sandboxCliente) ResultadoEnquete(_ context.Context, _ string, pollID st
 	for i, opt := range enq.Opcoes {
 		opcoes[i] = EnqueteOpcaoResultado{Opcao: opt, Votantes: []string{}}
 	}
+	total := s.aplicarVotos(pollID, opcoes)
 	return EnqueteResultado{
-		PollID:      pollID,
-		Opcoes:      opcoes,
-		CalculadoEm: time.Now().UTC(),
+		PollID:        pollID,
+		Opcoes:        opcoes,
+		TotalVotantes: total,
+		CalculadoEm:   time.Now().UTC(),
 	}, nil
+}
+
+// votanteSandbox é o JID do número próprio do Dublê, que aparece como votante
+// em ResultadoEnquete depois de VotarEnquete.
+const votanteSandbox = "sandbox@s.whatsapp.net"
+
+// aplicarVotos preenche o tally com o voto guardado por VotarEnquete e devolve
+// o total de votantes (0 ou 1: só a própria instância vota). Chamar com s.mu.
+func (s *sandboxCliente) aplicarVotos(pollID string, opcoes []EnqueteOpcaoResultado) int {
+	votos := s.votosEnquete[pollID]
+	for i := range opcoes {
+		for _, v := range votos {
+			if v == opcoes[i].Opcao {
+				opcoes[i].Votos = 1
+				opcoes[i].Votantes = []string{votanteSandbox}
+			}
+		}
+	}
+	if len(votos) == 0 {
+		return 0
+	}
+	return 1
+}
+
+// validarVoto confere as opções contra a enquete, como o servidor real:
+// só opções existentes, sem repetir e até Selecionaveis.
+func validarVoto(enq *Enquete, opcoes []string) error {
+	if len(opcoes) > enq.Selecionaveis {
+		return novoErroAPI(ErrInvalido, "options excede selectable_count")
+	}
+	vistas := map[string]bool{}
+	for _, o := range opcoes {
+		if vistas[o] || !slices.Contains(enq.Opcoes, o) {
+			return novoErroAPI(ErrInvalido, "options invalida ou repetida")
+		}
+		vistas[o] = true
+	}
+	return nil
+}
+
+// VotarEnquete guarda o voto da instância na enquete fake (lista vazia retira)
+// e o mostra em ResultadoEnquete.
+func (s *sandboxCliente) VotarEnquete(_ context.Context, e EntradaVotarEnquete) (VotoEnquete, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if err := s.checarErro(); err != nil {
+		return VotoEnquete{}, err
+	}
+
+	enq, ok := s.enquetes[e.PollID]
+	if !ok {
+		return VotoEnquete{}, novoErroAPI(ErrNaoEncontrado, "enquete nao encontrada")
+	}
+	if enq.Encerrada {
+		return VotoEnquete{}, novoErroAPI(ErrConflito, "enquete encerrada")
+	}
+	if err := validarVoto(enq, e.Opcoes); err != nil {
+		return VotoEnquete{}, err
+	}
+	if s.votosEnquete == nil {
+		s.votosEnquete = make(map[string][]string)
+	}
+	s.votosEnquete[e.PollID] = append([]string(nil), e.Opcoes...)
+	return VotoEnquete{PollID: e.PollID, Opcoes: append([]string{}, e.Opcoes...)}, nil
 }
 
 // EncerrarEnquete marca a enquete fake como encerrada.

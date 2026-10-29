@@ -468,6 +468,22 @@ type RespostaEventoGrupo struct {
 	Resposta   string
 }
 
+// EntradaVotarEnquete parâmetros para POST .../polls/{poll_id}/vote. Opcoes
+// vazia retira o voto da instância.
+type EntradaVotarEnquete struct {
+	InstanciaID string
+	PollID      string
+	Opcoes      []string
+	EsperaSincrona
+}
+
+// VotoEnquete resultado de VotarEnquete -- as opções que ficaram marcadas
+// (vazio quando o voto foi retirado).
+type VotoEnquete struct {
+	PollID string
+	Opcoes []string
+}
+
 // EntradaGrupo parâmetros para criação de grupo.
 type EntradaGrupo struct {
 	InstanciaID   string
@@ -738,6 +754,7 @@ type Cliente interface {
 	CriarEnquete(ctx context.Context, e EntradaCriarEnquete) (Enquete, error)
 	ResultadoEnquete(ctx context.Context, instanciaID, pollID string) (EnqueteResultado, error)
 	EncerrarEnquete(ctx context.Context, instanciaID, pollID string) (Enquete, error)
+	VotarEnquete(ctx context.Context, e EntradaVotarEnquete) (VotoEnquete, error)
 
 	CriarEventoGrupo(ctx context.Context, e EntradaCriarEventoGrupo) (EventoGrupo, error)
 	AtualizarEventoGrupo(ctx context.Context, e EntradaAtualizarEventoGrupo) (EventoGrupo, error)

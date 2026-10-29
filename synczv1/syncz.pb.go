@@ -5288,6 +5288,139 @@ func (x *ClosePollRequest) GetPollId() string {
 	return ""
 }
 
+// VotePoll vota, pelo numero pareado da instancia, numa enquete aberta criada por ela.
+// options sao os TEXTOS das opcoes (sem repetir, no maximo selectable_count quando > 0);
+// o voto novo substitui o anterior e lista vazia retira o voto.
+// Erros: InvalidArgument (opcao inexistente/repetida/acima de selectable_count),
+// NotFound (enquete de outra instancia ou inexistente), FailedPrecondition (enquete fechada).
+type VotePollRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	InstanceId    string                 `protobuf:"bytes,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	PollId        string                 `protobuf:"bytes,2,opt,name=poll_id,json=pollId,proto3" json:"poll_id,omitempty"`
+	Options       []string               `protobuf:"bytes,3,rep,name=options,proto3" json:"options,omitempty"`
+	Wait          bool                   `protobuf:"varint,4,opt,name=wait,proto3" json:"wait,omitempty"`
+	WaitTimeoutMs int64                  `protobuf:"varint,5,opt,name=wait_timeout_ms,json=waitTimeoutMs,proto3" json:"wait_timeout_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VotePollRequest) Reset() {
+	*x = VotePollRequest{}
+	mi := &file_syncz_v1_syncz_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VotePollRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VotePollRequest) ProtoMessage() {}
+
+func (x *VotePollRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_syncz_v1_syncz_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VotePollRequest.ProtoReflect.Descriptor instead.
+func (*VotePollRequest) Descriptor() ([]byte, []int) {
+	return file_syncz_v1_syncz_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *VotePollRequest) GetInstanceId() string {
+	if x != nil {
+		return x.InstanceId
+	}
+	return ""
+}
+
+func (x *VotePollRequest) GetPollId() string {
+	if x != nil {
+		return x.PollId
+	}
+	return ""
+}
+
+func (x *VotePollRequest) GetOptions() []string {
+	if x != nil {
+		return x.Options
+	}
+	return nil
+}
+
+func (x *VotePollRequest) GetWait() bool {
+	if x != nil {
+		return x.Wait
+	}
+	return false
+}
+
+func (x *VotePollRequest) GetWaitTimeoutMs() int64 {
+	if x != nil {
+		return x.WaitTimeoutMs
+	}
+	return 0
+}
+
+type VotePollResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PollId        string                 `protobuf:"bytes,1,opt,name=poll_id,json=pollId,proto3" json:"poll_id,omitempty"`
+	Options       []string               `protobuf:"bytes,2,rep,name=options,proto3" json:"options,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VotePollResponse) Reset() {
+	*x = VotePollResponse{}
+	mi := &file_syncz_v1_syncz_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VotePollResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VotePollResponse) ProtoMessage() {}
+
+func (x *VotePollResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_syncz_v1_syncz_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VotePollResponse.ProtoReflect.Descriptor instead.
+func (*VotePollResponse) Descriptor() ([]byte, []int) {
+	return file_syncz_v1_syncz_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *VotePollResponse) GetPollId() string {
+	if x != nil {
+		return x.PollId
+	}
+	return ""
+}
+
+func (x *VotePollResponse) GetOptions() []string {
+	if x != nil {
+		return x.Options
+	}
+	return nil
+}
+
 var File_syncz_v1_syncz_proto protoreflect.FileDescriptor
 
 const file_syncz_v1_syncz_proto_rawDesc = "" +
@@ -5737,12 +5870,22 @@ const file_syncz_v1_syncz_proto_rawDesc = "" +
 	"\x10ClosePollRequest\x12\x1f\n" +
 	"\vinstance_id\x18\x01 \x01(\tR\n" +
 	"instanceId\x12\x17\n" +
-	"\apoll_id\x18\x02 \x01(\tR\x06pollId*\x99\x01\n" +
+	"\apoll_id\x18\x02 \x01(\tR\x06pollId\"\xa1\x01\n" +
+	"\x0fVotePollRequest\x12\x1f\n" +
+	"\vinstance_id\x18\x01 \x01(\tR\n" +
+	"instanceId\x12\x17\n" +
+	"\apoll_id\x18\x02 \x01(\tR\x06pollId\x12\x18\n" +
+	"\aoptions\x18\x03 \x03(\tR\aoptions\x12\x12\n" +
+	"\x04wait\x18\x04 \x01(\bR\x04wait\x12&\n" +
+	"\x0fwait_timeout_ms\x18\x05 \x01(\x03R\rwaitTimeoutMs\"E\n" +
+	"\x10VotePollResponse\x12\x17\n" +
+	"\apoll_id\x18\x01 \x01(\tR\x06pollId\x12\x18\n" +
+	"\aoptions\x18\x02 \x03(\tR\aoptions*\x99\x01\n" +
 	"\x11EventResponseType\x12#\n" +
 	"\x1fEVENT_RESPONSE_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19EVENT_RESPONSE_TYPE_GOING\x10\x01\x12!\n" +
 	"\x1dEVENT_RESPONSE_TYPE_NOT_GOING\x10\x02\x12\x1d\n" +
-	"\x19EVENT_RESPONSE_TYPE_MAYBE\x10\x032\x88\x16\n" +
+	"\x19EVENT_RESPONSE_TYPE_MAYBE\x10\x032\xcb\x16\n" +
 	"\aSyncZap\x12J\n" +
 	"\vSendMessage\x12\x1c.syncz.v1.SendMessageRequest\x1a\x1d.syncz.v1.SendMessageResponse\x12F\n" +
 	"\tSendMedia\x12\x18.syncz.v1.SendMediaChunk\x1a\x1d.syncz.v1.SendMessageResponse(\x01\x12@\n" +
@@ -5777,7 +5920,8 @@ const file_syncz_v1_syncz_proto_rawDesc = "" +
 	"CreatePoll\x12\x1b.syncz.v1.CreatePollRequest\x1a\x0e.syncz.v1.Poll\x12D\n" +
 	"\tListPolls\x12\x1a.syncz.v1.ListPollsRequest\x1a\x1b.syncz.v1.ListPollsResponse\x12H\n" +
 	"\x0eGetPollResults\x12\x1f.syncz.v1.GetPollResultsRequest\x1a\x15.syncz.v1.PollResults\x127\n" +
-	"\tClosePoll\x12\x1a.syncz.v1.ClosePollRequest\x1a\x0e.syncz.v1.Poll\x12I\n" +
+	"\tClosePoll\x12\x1a.syncz.v1.ClosePollRequest\x1a\x0e.syncz.v1.Poll\x12A\n" +
+	"\bVotePoll\x12\x19.syncz.v1.VotePollRequest\x1a\x1a.syncz.v1.VotePollResponse\x12I\n" +
 	"\fPairingState\x12\x1d.syncz.v1.PairingStateRequest\x1a\x1a.syncz.v1.PairingStateInfo\x12C\n" +
 	"\vGetContract\x12\x1c.syncz.v1.GetContractRequest\x1a\x16.syncz.v1.ContractInfo\x12M\n" +
 	"\fGrantConsent\x12\x1d.syncz.v1.GrantConsentRequest\x1a\x1e.syncz.v1.GrantConsentResponse\x12S\n" +
@@ -5798,7 +5942,7 @@ func file_syncz_v1_syncz_proto_rawDescGZIP() []byte {
 }
 
 var file_syncz_v1_syncz_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_syncz_v1_syncz_proto_msgTypes = make([]protoimpl.MessageInfo, 76)
+var file_syncz_v1_syncz_proto_msgTypes = make([]protoimpl.MessageInfo, 78)
 var file_syncz_v1_syncz_proto_goTypes = []any{
 	(EventResponseType)(0),             // 0: syncz.v1.EventResponseType
 	(*SendMessageRequest)(nil),         // 1: syncz.v1.SendMessageRequest
@@ -5877,37 +6021,39 @@ var file_syncz_v1_syncz_proto_goTypes = []any{
 	(*PollResults)(nil),                // 74: syncz.v1.PollResults
 	(*PollOptionTally)(nil),            // 75: syncz.v1.PollOptionTally
 	(*ClosePollRequest)(nil),           // 76: syncz.v1.ClosePollRequest
-	(*timestamppb.Timestamp)(nil),      // 77: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),            // 78: google.protobuf.Struct
+	(*VotePollRequest)(nil),            // 77: syncz.v1.VotePollRequest
+	(*VotePollResponse)(nil),           // 78: syncz.v1.VotePollResponse
+	(*timestamppb.Timestamp)(nil),      // 79: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),            // 80: google.protobuf.Struct
 }
 var file_syncz_v1_syncz_proto_depIdxs = []int32{
-	77, // 0: syncz.v1.SendMessageResponse.sent_at:type_name -> google.protobuf.Timestamp
+	79, // 0: syncz.v1.SendMessageResponse.sent_at:type_name -> google.protobuf.Timestamp
 	4,  // 1: syncz.v1.SendMediaChunk.metadata:type_name -> syncz.v1.MediaMetadata
-	77, // 2: syncz.v1.Event.occurred_at:type_name -> google.protobuf.Timestamp
+	79, // 2: syncz.v1.Event.occurred_at:type_name -> google.protobuf.Timestamp
 	9,  // 3: syncz.v1.PairingEvent.qr:type_name -> syncz.v1.QRCode
 	10, // 4: syncz.v1.PairingEvent.scanned:type_name -> syncz.v1.Scanned
 	11, // 5: syncz.v1.PairingEvent.paired:type_name -> syncz.v1.Paired
 	12, // 6: syncz.v1.PairingEvent.failed:type_name -> syncz.v1.Failed
-	77, // 7: syncz.v1.QRCode.expires_at:type_name -> google.protobuf.Timestamp
+	79, // 7: syncz.v1.QRCode.expires_at:type_name -> google.protobuf.Timestamp
 	17, // 8: syncz.v1.ListInstancesResponse.instances:type_name -> syncz.v1.Instance
-	77, // 9: syncz.v1.Instance.created_at:type_name -> google.protobuf.Timestamp
-	77, // 10: syncz.v1.Instance.updated_at:type_name -> google.protobuf.Timestamp
-	77, // 11: syncz.v1.Instance.paired_at:type_name -> google.protobuf.Timestamp
+	79, // 9: syncz.v1.Instance.created_at:type_name -> google.protobuf.Timestamp
+	79, // 10: syncz.v1.Instance.updated_at:type_name -> google.protobuf.Timestamp
+	79, // 11: syncz.v1.Instance.paired_at:type_name -> google.protobuf.Timestamp
 	18, // 12: syncz.v1.Instance.consent:type_name -> syncz.v1.Consent
-	77, // 13: syncz.v1.Consent.requested_at:type_name -> google.protobuf.Timestamp
-	77, // 14: syncz.v1.Consent.granted_at:type_name -> google.protobuf.Timestamp
-	77, // 15: syncz.v1.Consent.revoked_at:type_name -> google.protobuf.Timestamp
-	78, // 16: syncz.v1.Consent.evidence:type_name -> google.protobuf.Struct
-	77, // 17: syncz.v1.WizardLink.expires_at:type_name -> google.protobuf.Timestamp
-	77, // 18: syncz.v1.SubjectAccess.expires_at:type_name -> google.protobuf.Timestamp
+	79, // 13: syncz.v1.Consent.requested_at:type_name -> google.protobuf.Timestamp
+	79, // 14: syncz.v1.Consent.granted_at:type_name -> google.protobuf.Timestamp
+	79, // 15: syncz.v1.Consent.revoked_at:type_name -> google.protobuf.Timestamp
+	80, // 16: syncz.v1.Consent.evidence:type_name -> google.protobuf.Struct
+	79, // 17: syncz.v1.WizardLink.expires_at:type_name -> google.protobuf.Timestamp
+	79, // 18: syncz.v1.SubjectAccess.expires_at:type_name -> google.protobuf.Timestamp
 	26, // 19: syncz.v1.UpdatePolicyRequest.policy:type_name -> syncz.v1.Policy
 	30, // 20: syncz.v1.GroupPhotoChunk.metadata:type_name -> syncz.v1.GroupPhotoMetadata
 	47, // 21: syncz.v1.CheckNumbersResponse.results:type_name -> syncz.v1.NumberInfo
-	77, // 22: syncz.v1.PairingStateInfo.expires_at:type_name -> google.protobuf.Timestamp
+	79, // 22: syncz.v1.PairingStateInfo.expires_at:type_name -> google.protobuf.Timestamp
 	54, // 23: syncz.v1.ContractInfo.required_scopes:type_name -> syncz.v1.ScopeInfo
 	54, // 24: syncz.v1.ContractInfo.optional_scopes:type_name -> syncz.v1.ScopeInfo
-	78, // 25: syncz.v1.GrantConsentRequest.evidence:type_name -> google.protobuf.Struct
-	77, // 26: syncz.v1.RequestConsentResponse.expires_at:type_name -> google.protobuf.Timestamp
+	80, // 25: syncz.v1.GrantConsentRequest.evidence:type_name -> google.protobuf.Struct
+	79, // 26: syncz.v1.RequestConsentResponse.expires_at:type_name -> google.protobuf.Timestamp
 	61, // 27: syncz.v1.ListGroupEventsResponse.events:type_name -> syncz.v1.GroupEvent
 	0,  // 28: syncz.v1.SendEventResponseRequest.response:type_name -> syncz.v1.EventResponseType
 	0,  // 29: syncz.v1.SendEventResponseResponse.response:type_name -> syncz.v1.EventResponseType
@@ -5945,52 +6091,54 @@ var file_syncz_v1_syncz_proto_depIdxs = []int32{
 	71, // 61: syncz.v1.SyncZap.ListPolls:input_type -> syncz.v1.ListPollsRequest
 	73, // 62: syncz.v1.SyncZap.GetPollResults:input_type -> syncz.v1.GetPollResultsRequest
 	76, // 63: syncz.v1.SyncZap.ClosePoll:input_type -> syncz.v1.ClosePollRequest
-	51, // 64: syncz.v1.SyncZap.PairingState:input_type -> syncz.v1.PairingStateRequest
-	53, // 65: syncz.v1.SyncZap.GetContract:input_type -> syncz.v1.GetContractRequest
-	56, // 66: syncz.v1.SyncZap.GrantConsent:input_type -> syncz.v1.GrantConsentRequest
-	58, // 67: syncz.v1.SyncZap.RequestConsent:input_type -> syncz.v1.RequestConsentRequest
-	60, // 68: syncz.v1.SyncZap.UnpairInstance:input_type -> syncz.v1.UnpairInstanceRequest
-	49, // 69: syncz.v1.SyncZap.GetUsage:input_type -> syncz.v1.GetUsageRequest
-	2,  // 70: syncz.v1.SyncZap.SendMessage:output_type -> syncz.v1.SendMessageResponse
-	2,  // 71: syncz.v1.SyncZap.SendMedia:output_type -> syncz.v1.SendMessageResponse
-	6,  // 72: syncz.v1.SyncZap.StreamEvents:output_type -> syncz.v1.Event
-	8,  // 73: syncz.v1.SyncZap.StartPairing:output_type -> syncz.v1.PairingEvent
-	17, // 74: syncz.v1.SyncZap.CreateInstance:output_type -> syncz.v1.Instance
-	17, // 75: syncz.v1.SyncZap.GetInstance:output_type -> syncz.v1.Instance
-	16, // 76: syncz.v1.SyncZap.ListInstances:output_type -> syncz.v1.ListInstancesResponse
-	20, // 77: syncz.v1.SyncZap.NewWizardLink:output_type -> syncz.v1.WizardLink
-	22, // 78: syncz.v1.SyncZap.NewSubjectAccess:output_type -> syncz.v1.SubjectAccess
-	17, // 79: syncz.v1.SyncZap.RevokeInstance:output_type -> syncz.v1.Instance
-	26, // 80: syncz.v1.SyncZap.GetPolicy:output_type -> syncz.v1.Policy
-	26, // 81: syncz.v1.SyncZap.UpdatePolicy:output_type -> syncz.v1.Policy
-	31, // 82: syncz.v1.SyncZap.CreateGroup:output_type -> syncz.v1.Group
-	31, // 83: syncz.v1.SyncZap.UpdateGroupName:output_type -> syncz.v1.Group
-	31, // 84: syncz.v1.SyncZap.UpdateGroupPhoto:output_type -> syncz.v1.Group
-	33, // 85: syncz.v1.SyncZap.AddParticipants:output_type -> syncz.v1.AddParticipantsResponse
-	35, // 86: syncz.v1.SyncZap.RemoveParticipants:output_type -> syncz.v1.RemoveParticipantsResponse
-	37, // 87: syncz.v1.SyncZap.GroupInviteLink:output_type -> syncz.v1.GroupInviteLinkResponse
-	39, // 88: syncz.v1.SyncZap.LeaveGroup:output_type -> syncz.v1.LeaveGroupResponse
-	41, // 89: syncz.v1.SyncZap.PinChat:output_type -> syncz.v1.PinChatResponse
-	43, // 90: syncz.v1.SyncZap.MarkRead:output_type -> syncz.v1.MarkReadResponse
-	45, // 91: syncz.v1.SyncZap.SetChatReadState:output_type -> syncz.v1.SetChatReadStateResponse
-	48, // 92: syncz.v1.SyncZap.CheckNumbers:output_type -> syncz.v1.CheckNumbersResponse
-	61, // 93: syncz.v1.SyncZap.CreateGroupEvent:output_type -> syncz.v1.GroupEvent
-	61, // 94: syncz.v1.SyncZap.UpdateGroupEvent:output_type -> syncz.v1.GroupEvent
-	61, // 95: syncz.v1.SyncZap.CancelGroupEvent:output_type -> syncz.v1.GroupEvent
-	66, // 96: syncz.v1.SyncZap.ListGroupEvents:output_type -> syncz.v1.ListGroupEventsResponse
-	68, // 97: syncz.v1.SyncZap.SendEventResponse:output_type -> syncz.v1.SendEventResponseResponse
-	69, // 98: syncz.v1.SyncZap.CreatePoll:output_type -> syncz.v1.Poll
-	72, // 99: syncz.v1.SyncZap.ListPolls:output_type -> syncz.v1.ListPollsResponse
-	74, // 100: syncz.v1.SyncZap.GetPollResults:output_type -> syncz.v1.PollResults
-	69, // 101: syncz.v1.SyncZap.ClosePoll:output_type -> syncz.v1.Poll
-	52, // 102: syncz.v1.SyncZap.PairingState:output_type -> syncz.v1.PairingStateInfo
-	55, // 103: syncz.v1.SyncZap.GetContract:output_type -> syncz.v1.ContractInfo
-	57, // 104: syncz.v1.SyncZap.GrantConsent:output_type -> syncz.v1.GrantConsentResponse
-	59, // 105: syncz.v1.SyncZap.RequestConsent:output_type -> syncz.v1.RequestConsentResponse
-	17, // 106: syncz.v1.SyncZap.UnpairInstance:output_type -> syncz.v1.Instance
-	50, // 107: syncz.v1.SyncZap.GetUsage:output_type -> syncz.v1.GetUsageResponse
-	70, // [70:108] is the sub-list for method output_type
-	32, // [32:70] is the sub-list for method input_type
+	77, // 64: syncz.v1.SyncZap.VotePoll:input_type -> syncz.v1.VotePollRequest
+	51, // 65: syncz.v1.SyncZap.PairingState:input_type -> syncz.v1.PairingStateRequest
+	53, // 66: syncz.v1.SyncZap.GetContract:input_type -> syncz.v1.GetContractRequest
+	56, // 67: syncz.v1.SyncZap.GrantConsent:input_type -> syncz.v1.GrantConsentRequest
+	58, // 68: syncz.v1.SyncZap.RequestConsent:input_type -> syncz.v1.RequestConsentRequest
+	60, // 69: syncz.v1.SyncZap.UnpairInstance:input_type -> syncz.v1.UnpairInstanceRequest
+	49, // 70: syncz.v1.SyncZap.GetUsage:input_type -> syncz.v1.GetUsageRequest
+	2,  // 71: syncz.v1.SyncZap.SendMessage:output_type -> syncz.v1.SendMessageResponse
+	2,  // 72: syncz.v1.SyncZap.SendMedia:output_type -> syncz.v1.SendMessageResponse
+	6,  // 73: syncz.v1.SyncZap.StreamEvents:output_type -> syncz.v1.Event
+	8,  // 74: syncz.v1.SyncZap.StartPairing:output_type -> syncz.v1.PairingEvent
+	17, // 75: syncz.v1.SyncZap.CreateInstance:output_type -> syncz.v1.Instance
+	17, // 76: syncz.v1.SyncZap.GetInstance:output_type -> syncz.v1.Instance
+	16, // 77: syncz.v1.SyncZap.ListInstances:output_type -> syncz.v1.ListInstancesResponse
+	20, // 78: syncz.v1.SyncZap.NewWizardLink:output_type -> syncz.v1.WizardLink
+	22, // 79: syncz.v1.SyncZap.NewSubjectAccess:output_type -> syncz.v1.SubjectAccess
+	17, // 80: syncz.v1.SyncZap.RevokeInstance:output_type -> syncz.v1.Instance
+	26, // 81: syncz.v1.SyncZap.GetPolicy:output_type -> syncz.v1.Policy
+	26, // 82: syncz.v1.SyncZap.UpdatePolicy:output_type -> syncz.v1.Policy
+	31, // 83: syncz.v1.SyncZap.CreateGroup:output_type -> syncz.v1.Group
+	31, // 84: syncz.v1.SyncZap.UpdateGroupName:output_type -> syncz.v1.Group
+	31, // 85: syncz.v1.SyncZap.UpdateGroupPhoto:output_type -> syncz.v1.Group
+	33, // 86: syncz.v1.SyncZap.AddParticipants:output_type -> syncz.v1.AddParticipantsResponse
+	35, // 87: syncz.v1.SyncZap.RemoveParticipants:output_type -> syncz.v1.RemoveParticipantsResponse
+	37, // 88: syncz.v1.SyncZap.GroupInviteLink:output_type -> syncz.v1.GroupInviteLinkResponse
+	39, // 89: syncz.v1.SyncZap.LeaveGroup:output_type -> syncz.v1.LeaveGroupResponse
+	41, // 90: syncz.v1.SyncZap.PinChat:output_type -> syncz.v1.PinChatResponse
+	43, // 91: syncz.v1.SyncZap.MarkRead:output_type -> syncz.v1.MarkReadResponse
+	45, // 92: syncz.v1.SyncZap.SetChatReadState:output_type -> syncz.v1.SetChatReadStateResponse
+	48, // 93: syncz.v1.SyncZap.CheckNumbers:output_type -> syncz.v1.CheckNumbersResponse
+	61, // 94: syncz.v1.SyncZap.CreateGroupEvent:output_type -> syncz.v1.GroupEvent
+	61, // 95: syncz.v1.SyncZap.UpdateGroupEvent:output_type -> syncz.v1.GroupEvent
+	61, // 96: syncz.v1.SyncZap.CancelGroupEvent:output_type -> syncz.v1.GroupEvent
+	66, // 97: syncz.v1.SyncZap.ListGroupEvents:output_type -> syncz.v1.ListGroupEventsResponse
+	68, // 98: syncz.v1.SyncZap.SendEventResponse:output_type -> syncz.v1.SendEventResponseResponse
+	69, // 99: syncz.v1.SyncZap.CreatePoll:output_type -> syncz.v1.Poll
+	72, // 100: syncz.v1.SyncZap.ListPolls:output_type -> syncz.v1.ListPollsResponse
+	74, // 101: syncz.v1.SyncZap.GetPollResults:output_type -> syncz.v1.PollResults
+	69, // 102: syncz.v1.SyncZap.ClosePoll:output_type -> syncz.v1.Poll
+	78, // 103: syncz.v1.SyncZap.VotePoll:output_type -> syncz.v1.VotePollResponse
+	52, // 104: syncz.v1.SyncZap.PairingState:output_type -> syncz.v1.PairingStateInfo
+	55, // 105: syncz.v1.SyncZap.GetContract:output_type -> syncz.v1.ContractInfo
+	57, // 106: syncz.v1.SyncZap.GrantConsent:output_type -> syncz.v1.GrantConsentResponse
+	59, // 107: syncz.v1.SyncZap.RequestConsent:output_type -> syncz.v1.RequestConsentResponse
+	17, // 108: syncz.v1.SyncZap.UnpairInstance:output_type -> syncz.v1.Instance
+	50, // 109: syncz.v1.SyncZap.GetUsage:output_type -> syncz.v1.GetUsageResponse
+	71, // [71:110] is the sub-list for method output_type
+	32, // [32:71] is the sub-list for method input_type
 	32, // [32:32] is the sub-list for extension type_name
 	32, // [32:32] is the sub-list for extension extendee
 	0,  // [0:32] is the sub-list for field type_name
@@ -6023,7 +6171,7 @@ func file_syncz_v1_syncz_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_syncz_v1_syncz_proto_rawDesc), len(file_syncz_v1_syncz_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   76,
+			NumMessages:   78,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

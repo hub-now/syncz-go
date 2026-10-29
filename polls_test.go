@@ -321,7 +321,8 @@ func TestEnquete_Sandbox(t *testing.T) {
 // do SDK faz (ver mockSyncZapServer em grpc_test.go).
 type mockPollsServer struct {
 	synczv1.UnimplementedSyncZapServer
-	fechada bool
+	fechada      bool
+	votoRecebido *synczv1.VotePollRequest
 }
 
 func (m *mockPollsServer) CreatePoll(_ context.Context, req *synczv1.CreatePollRequest) (*synczv1.Poll, error) {

@@ -1324,6 +1324,30 @@ func (c *clienteREST) ResponderEventoGrupo(ctx context.Context, e EntradaRespond
 	}, nil
 }
 
+// VotarEnquete consulta POST .../polls/{poll_id}/vote -- ver
+// internal/modulos/rest/polls.go (handleVotePoll).
+func (c *clienteREST) VotarEnquete(ctx context.Context, e EntradaVotarEnquete) (VotoEnquete, error) {
+	opcoes := e.Opcoes
+	if opcoes == nil {
+		opcoes = []string{}
+	}
+	corpo := map[string]any{"options": opcoes}
+	path := comWaitQuery(fmt.Sprintf("/api/v1/instances/%s/polls/%s/vote", url.PathEscape(e.InstanciaID), url.PathEscape(e.PollID)), e.EsperaSincrona)
+	_, respBytes, err := c.requisicao(ctx, http.MethodPost, path, corpo, "")
+	if err != nil {
+		return VotoEnquete{}, err
+	}
+
+	var res struct {
+		PollID  string   `json:"poll_id"`
+		Options []string `json:"options"`
+	}
+	if err := json.Unmarshal(respBytes, &res); err != nil {
+		return VotoEnquete{}, fmt.Errorf("syncz: desserializar voto de enquete: %w", err)
+	}
+	return VotoEnquete{PollID: res.PollID, Opcoes: res.Options}, nil
+}
+
 func (c *clienteREST) CriarGrupo(ctx context.Context, e EntradaGrupo) (Grupo, error) {
 	corpo := map[string]any{
 		"subject":      e.Assunto,
